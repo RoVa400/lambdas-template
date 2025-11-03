@@ -17,8 +17,8 @@
 
   <!-- Plugin versions -->
   <properties>
-    <maven.compiler.source></maven.compiler.source>
-    <maven.compiler.target></maven.compiler.target>
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
     <maven.compiler.version>3.11.0</maven.compiler.version>
     <aws.lamda.java.core.version>1.2.3</lamda.java.core.version>
     <aws.lamda.java.events.version>3.11.0</lamda.java.events.version>
