@@ -1,5 +1,7 @@
 # AWS Lambda Java Template
 
+> ⚠️ **Warning:** This template is done after trying to create a maven archetype, but I couldn't add the `.gitignore` file to the archetype (yes, I did't want to copy those impressive 5 lines of code to every new project). If you know how to do it, please let me know.
+
 ## Description
 
 This project serves as a **template for creating AWS Lambda projects** using **Java with Maven**.  
