@@ -1,0 +1,76 @@
+name: CI/CD Lambda by Tag
+
+on:
+  push:
+    tags:
+      - '*-v*.*.*'  # Detecta tags tipo helloWorld-v1.0.0, sumNumbers-v1.0.0
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_REGION: eu-north-1
+      JAVA_VERSION: 21 # Use the same java version as in the pom.xml
+
+    steps:
+      # 1️⃣ Checkout del repositorio
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      # 2️⃣ Setup Java 
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+
+      # 3️⃣ Install SAM CLI
+      - name: Install SAM CLI
+        run: |
+          pip install --upgrade pip
+          pip install aws-sam-cli
+
+      # 4️⃣ Configure AWS credentials
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # 5️⃣ Identify the module from tag
+      - name: Set module path
+        id: module
+        run: |
+          TAG_NAME=${GITHUB_REF##refs/tags/}
+          MODULE_NAME=${TAG_NAME%-v*}
+          echo "module=$MODULE_NAME" >> $GITHUB_OUTPUT
+          echo "Detected module: $MODULE_NAME"
+
+      # 6️⃣ Run Maven tests for the module
+      - name: Run Maven tests
+        run: mvn test
+        working-directory: lambda-functions/${{ steps.module.outputs.module }}
+        
+      # 7️⃣ Build the module
+      - name: Build Maven package
+        run: mvn clean package -DskipTests
+        working-directory: lambda-functions/${{ steps.module.outputs.module }}
+
+      # 8️⃣ Replace version in template.yml
+      - name: Replace version in SAM template
+        working-directory: lambda-functions/${{ steps.module.outputs.module }}
+        run: |
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "Using version: $VERSION"
+          sed -i "s/\${VERSION}/$VERSION/g" template.yml
+
+      # 9️⃣ SAM Deploy
+      - name: SAM Deploy
+        working-directory: lambda-functions/${{ steps.module.outputs.module }}
+        run: 
+          sam deploy --no-confirm-changeset \
+                    --no-fail-on-empty-changeset \
+                    --template-file template.yml \
+                    --config-file samconfig.toml

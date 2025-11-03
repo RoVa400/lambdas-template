@@ -1,0 +1,5 @@
+.vscode/settings.json
+.aws-sam/*
+*/target/
+dependency-reduced-pom.xml
+build.toml
