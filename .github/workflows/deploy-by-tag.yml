@@ -3,7 +3,7 @@ name: CI/CD Lambda by Tag
 on:
   push:
     tags:
-      - '*-v*.*.*'  # Detecta tags tipo helloWorld-v1.0.0, sumNumbers-v1.0.0
+      - '*-v*.*.*'  # Detects tags like helloWorld-v1.0.0, sumNumbers-v1.0.0
 
 jobs:
   deploy:
@@ -11,14 +11,14 @@ jobs:
 
     env:
       AWS_REGION: eu-north-1
-      JAVA_VERSION: 21 # Use the same java version as in the pom.xml
+      JAVA_VERSION: 21 # Use the same Java version as defined in the pom.xml
 
     steps:
-      # 1️⃣ Checkout del repositorio
-      - name: Checkout repo
+      # 1️⃣ Checkout the repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Setup Java 
+      # 2️⃣ Set up Java
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
@@ -39,7 +39,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # 5️⃣ Identify the module from tag
+      # 5️⃣ Identify the module from the tag
       - name: Set module path
         id: module
         run: |
@@ -48,17 +48,17 @@ jobs:
           echo "module=$MODULE_NAME" >> $GITHUB_OUTPUT
           echo "Detected module: $MODULE_NAME"
 
-      # 6️⃣ Run Maven tests for the module
+      # 6️⃣ Run Maven tests for the detected module
       - name: Run Maven tests
         run: mvn test
         working-directory: lambda-functions/${{ steps.module.outputs.module }}
         
-      # 7️⃣ Build the module
+      # 7️⃣ Build the Maven package for the module
       - name: Build Maven package
         run: mvn clean package -DskipTests
         working-directory: lambda-functions/${{ steps.module.outputs.module }}
 
-      # 8️⃣ Replace version in template.yml
+      # 8️⃣ Replace the version placeholder in template.yml
       - name: Replace version in SAM template
         working-directory: lambda-functions/${{ steps.module.outputs.module }}
         run: |
@@ -66,11 +66,11 @@ jobs:
           echo "Using version: $VERSION"
           sed -i "s/\${VERSION}/$VERSION/g" template.yml
 
-      # 9️⃣ SAM Deploy
+      # 9️⃣ Deploy using AWS SAM
       - name: SAM Deploy
         working-directory: lambda-functions/${{ steps.module.outputs.module }}
-        run: 
+        run:
           sam deploy --no-confirm-changeset \
-                    --no-fail-on-empty-changeset \
-                    --template-file template.yml \
-                    --config-file samconfig.toml
+                     --no-fail-on-empty-changeset \
+                     --template-file template.yml \
+                     --config-file samconfig.toml
