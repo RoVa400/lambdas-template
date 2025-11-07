@@ -51,16 +51,16 @@ jobs:
       # 6️⃣ Run Maven tests for the detected module
       - name: Run Maven tests
         run: mvn test
-        working-directory: lambda-functions/${{ steps.module.outputs.module }}
+        working-directory: ${{ steps.module.outputs.module }}
         
       # 7️⃣ Build the Maven package for the module
       - name: Build Maven package
         run: mvn clean package -DskipTests
-        working-directory: lambda-functions/${{ steps.module.outputs.module }}
+        working-directory: ${{ steps.module.outputs.module }}
 
       # 8️⃣ Replace the version placeholder in template.yml
       - name: Replace version in SAM template
-        working-directory: lambda-functions/${{ steps.module.outputs.module }}
+        working-directory: ${{ steps.module.outputs.module }}
         run: |
           VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
           echo "Using version: $VERSION"
@@ -68,7 +68,7 @@ jobs:
 
       # 9️⃣ Deploy using AWS SAM
       - name: SAM Deploy
-        working-directory: lambda-functions/${{ steps.module.outputs.module }}
+        working-directory: ${{ steps.module.outputs.module }}
         run:
           sam deploy --no-confirm-changeset \
                      --no-fail-on-empty-changeset \
