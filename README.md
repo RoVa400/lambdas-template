@@ -73,7 +73,29 @@ These are some basic steps you should follow when using this template:
 
    These credentials should belong to an AWS IAM user with sufficient permissions to    deploy and manage Lambda functions.
 
+5. **Add lambda functions**
+   To further facilitate the use of this template as a project base, the following URL provides a Maven archetype that allows you to generate lambda subprojects.
+   https://rova400.github.io/Lambda-archetype/
 
+   ```bash
+     mvn archetype:generate ^
+       -DarchetypeGroupId=com.example ^
+       -DarchetypeArtifactId=lambda-function-archetype ^
+       -DarchetypeVersion=0.1.0 ^
+       -DarchetypeRepository=https://rova-dev.github.io/Lambda-archetype/
+   ```
+   
+   You will be prompted to enter the following information:
+   | Property | Description | Example |
+   |-----------|--------------|----------|
+   | **parentArtifactId** | The artifact ID of the parent project where this Lambda module will belong. | `my-lambda-parent` |
+   | **artifactId** | The artifact ID for your new Lambda module. This will also be the folder name of your generated project. | `my-lambda-function` |
+   | **parentGroupId** | The group ID of your parent project. | `com.trileuco` |
+   | **groupId** | The group ID of your Lambda module. | `com.trileuco.lambda` |
+   | **package** | The base Java package for your generated source code. | `com.trileuco.lambda.example` |
+   | **version** | The initial version of your Lambda project. | `0.1.0` |
+   | **httpMethod** | The HTTP method your Lambda function will handle (e.g., `GET`, `POST`, `PUT`, `DELETE`). | `GET` |
+   | **artifactIdCapitalized** | The capitalized version of your artifact ID, used for class names. | `MyLambdaFunction` |
 
 
 
